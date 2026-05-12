@@ -13,6 +13,7 @@ import TicketDetail from './pages/TicketDetail';
 import Settings from './pages/Settings';
 import MentionsLegales from './pages/MentionsLegales';
 import GroupsList from './pages/GroupsList';
+import ChatView from './pages/ChatView';
 
 function App() {
   // État global de connexion (simulé)
@@ -37,6 +38,7 @@ function App() {
             <Route path="/account" element={<Settings setIsLoggedIn={setIsLoggedIn} />} />
             <Route path="/mentions-legales" element={<MentionsLegales />} />
             <Route path="/groups" element={<GroupsList />} />
+            <Route path="/chat/:id" element={<ChatView />} />
           </Routes>
         </main>
         
