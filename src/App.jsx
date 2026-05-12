@@ -9,6 +9,7 @@ import Register from './pages/Register';
 import EventDetails from './pages/EventDetails';
 import Payment from './pages/Payment';
 import MyTickets from './pages/MyTickets';
+import TicketDetail from './pages/TicketDetail';
 
 function App() {
   // État global de connexion (simulé)
@@ -29,6 +30,7 @@ function App() {
             <Route path="/event/:id" element={<EventDetails />} />
             <Route path="/payment/:id" element={<Payment />} />
             <Route path="/my-tickets" element={<MyTickets />} />
+            <Route path="/ticket-detail/:id" element={<TicketDetail />} />
           </Routes>
         </main>
         
