@@ -1,15 +1,21 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Ticket, Calendar, MapPin, ArrowRight, QrCode } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Ticket, Calendar, MapPin, ArrowRight, QrCode, ArrowLeft } from 'lucide-react';
 import { allEvents } from '../data/events';
 
 const MyTickets = () => {
-  // Simulation : on considère que l'utilisateur a acheté les events 1, 3 et 5
+  const navigate = useNavigate(); // Initialise le hook
   const purchasedIds = [1, 3, 5];
   const myTickets = allEvents.filter(event => purchasedIds.includes(event.id));
 
   return (
     <div className="max-w-4xl mx-auto p-6 mb-20">
+      <button 
+        onClick={() => navigate('/account')} // On remplace -1 par le chemin exact
+        className="flex items-center gap-2 text-gray-500 hover:text-[#1e2da7] mb-6 transition-colors font-semibold"
+      >
+        <ArrowLeft size={20} /> Retour au compte
+      </button>
       <div className="flex items-center gap-4 mb-10">
         <div className="bg-[#1e2da7] p-3 rounded-2xl text-white shadow-lg shadow-blue-100">
           <Ticket size={32} />

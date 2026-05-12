@@ -10,6 +10,7 @@ import EventDetails from './pages/EventDetails';
 import Payment from './pages/Payment';
 import MyTickets from './pages/MyTickets';
 import TicketDetail from './pages/TicketDetail';
+import Settings from './pages/Settings';
 
 function App() {
   // État global de connexion (simulé)
@@ -31,6 +32,7 @@ function App() {
             <Route path="/payment/:id" element={<Payment />} />
             <Route path="/my-tickets" element={<MyTickets />} />
             <Route path="/ticket-detail/:id" element={<TicketDetail />} />
+            <Route path="/account" element={<Settings setIsLoggedIn={setIsLoggedIn} />} />
           </Routes>
         </main>
         
