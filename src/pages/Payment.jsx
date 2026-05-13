@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { CreditCard, Lock, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { allEvents } from '../data/events';
 
@@ -7,7 +7,8 @@ const Payment = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  
+  const [searchParams] = useSearchParams();
+  const count = parseInt(searchParams.get('count')) || 1;  
   const event = allEvents.find(e => e.id === parseInt(id));
 
   useEffect(() => {
@@ -19,13 +20,13 @@ const Payment = () => {
     setLoading(true);
     // Simulation d'un délai de transaction
     setTimeout(() => {
-      setLoading(false);
-      alert("Paiement validé !");
-      navigate('/');
+      navigate(`/payment-success?count=${count}`);
     }, 2000);
   };
 
   if (!event) return null;
+
+  const totalPrice = parseInt(event.price) * count;
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6">
@@ -40,7 +41,7 @@ const Payment = () => {
           <div>
             <p className="text-[#1e2da7] font-bold uppercase tracking-widest text-sm mb-2">Votre commande</p>
             <h1 className="text-4xl font-black text-gray-900 leading-tight">{event.title}</h1>
-            <p className="text-5xl font-black text-[#1e2da7] mt-4">{event.price}</p>
+            <p className="text-5xl font-black text-[#1e2da7] mt-4">{totalPrice}€</p>
           </div>
 
           <div className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
@@ -81,7 +82,7 @@ const Payment = () => {
               disabled={loading}
               className={`w-full py-4 rounded-xl text-white font-black text-lg shadow-lg transition-all flex items-center justify-center gap-3 ${loading ? 'bg-gray-400' : 'bg-[#1e2da7] hover:bg-[#f06292]'}`}
             >
-              {loading ? "Traitement..." : `Payer ${event.price}`}
+            {loading ? "Traitement..." : `Payer ${totalPrice}€`}
               {!loading && <Lock size={18} />}
             </button>
 

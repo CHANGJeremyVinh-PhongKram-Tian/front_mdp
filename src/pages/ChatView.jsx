@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, CreditCard, Check, X } from 'lucide-react';
+import { allEvents } from '../data/events';
 
 const ChatView = () => {
   const { id } = useParams();
@@ -25,7 +26,8 @@ const ChatView = () => {
   };
 
   const selectedCount = members.filter(m => m.selected).length;
-  const pricePerTicket = 35;
+  const event = allEvents.find(e => e.id === parseInt(id));
+  const pricePerTicket = event ? parseInt(event.price) : 0;
 
   return (
     /* MODIFICATION ICI :

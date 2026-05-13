@@ -14,6 +14,7 @@ import Settings from './pages/Settings';
 import MentionsLegales from './pages/MentionsLegales';
 import GroupsList from './pages/GroupsList';
 import ChatView from './pages/ChatView';
+import PaymentSuccess from './pages/PaymentSuccess';
 
 function App() {
   // État global de connexion (simulé)
@@ -39,6 +40,7 @@ function App() {
             <Route path="/mentions-legales" element={<MentionsLegales />} />
             <Route path="/groups" element={<GroupsList />} />
             <Route path="/chat/:id" element={<ChatView />} />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
           </Routes>
         </main>
         
