@@ -7,7 +7,7 @@ const Navbar = ({ isLoggedIn }) => {
   const navItems = [
     { label: 'Explorer', icon: <Compass size={24} />, path: '/' },
     { label: 'Recherche', icon: <Search size={24} />, path: '/search' },
-    { label: 'Organisateur', icon: <ShieldCheck size={24} />, path: '/organizer' },
+    { label: 'Organisateur', icon: <ShieldCheck size={24} />, path: '/organizer/login' },
   ];
 
   // 2. On ajoute l'item "Messages" UNIQUEMENT si l'utilisateur est connecté
