@@ -20,7 +20,9 @@ import OrganizerDashboard from './pages/OrganizerDashboard';
 import OrganizerRevenue from './pages/OrganizerRevenue';
 import OrganizerTickets from './pages/OrganizerTickets';
 import OrganizerEngagement from './pages/OrganizerEngagement';
-import OrganizerEventDetail from './pages/OrganizerEventDetail'; 
+import OrganizerEventDetail from './pages/OrganizerEventDetail';
+import OrganizerCreateEvent from './pages/OrganizerCreateEvent';
+import EventCreationSuccess from './pages/EventCreationSuccess'; 
 
 function App() {
   // État global de connexion (simulé)
@@ -53,6 +55,8 @@ function App() {
             <Route path="/organizer/stats/tickets" element={<OrganizerTickets />} />
             <Route path="/organizer/stats/engagement" element={<OrganizerEngagement />} />
             <Route path="/organizer/event/:id" element={<OrganizerEventDetail />} />
+            <Route path="/organizer/create" element={<OrganizerCreateEvent />} />
+            <Route path="/organizer/create-success" element={<EventCreationSuccess />} />
           </Routes>
         </main>
         
