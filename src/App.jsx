@@ -15,7 +15,12 @@ import MentionsLegales from './pages/MentionsLegales';
 import GroupsList from './pages/GroupsList';
 import ChatView from './pages/ChatView';
 import PaymentSuccess from './pages/PaymentSuccess';
-import OrganizerAuth from './pages/OrganizerAuth'; 
+import OrganizerAuth from './pages/OrganizerAuth';
+import OrganizerDashboard from './pages/OrganizerDashboard';
+import OrganizerRevenue from './pages/OrganizerRevenue';
+import OrganizerTickets from './pages/OrganizerTickets';
+import OrganizerEngagement from './pages/OrganizerEngagement';
+import OrganizerEventDetail from './pages/OrganizerEventDetail'; 
 
 function App() {
   // État global de connexion (simulé)
@@ -43,6 +48,11 @@ function App() {
             <Route path="/chat/:id" element={<ChatView />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/organizer/login" element={<OrganizerAuth />} />
+            <Route path="/organizer/dashboard" element={<OrganizerDashboard />} />
+            <Route path="/organizer/stats/revenue" element={<OrganizerRevenue />} />
+            <Route path="/organizer/stats/tickets" element={<OrganizerTickets />} />
+            <Route path="/organizer/stats/engagement" element={<OrganizerEngagement />} />
+            <Route path="/organizer/event/:id" element={<OrganizerEventDetail />} />
           </Routes>
         </main>
         
