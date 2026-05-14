@@ -35,6 +35,19 @@ const OrganizerDashboard = () => {
             <h1 className="text-4xl font-black text-[#1e2da7] uppercase tracking-tighter italic">Dashboard</h1>
             <p className="text-gray-500 font-bold mt-1 text-sm md:text-base">Suivez vos performances et gérez vos évènements SparkUp.</p>
           </div>
+          <div>
+            <div className="flex items-center gap-4 mt-1">
+            <p className="text-gray-500 font-bold">Gestion Pro</p>
+            <span className="text-gray-200">|</span>
+            {/* BOUTON VERS LE SUPPORT */}
+            <button 
+                onClick={() => navigate('/organizer/support')}
+                className="text-[#f06292] font-black uppercase text-[10px] tracking-widest hover:underline"
+            >
+                Besoin d'aide ?
+            </button>
+            </div>
+        </div>
           <button 
             onClick={() => navigate('/organizer/create')}
             className="w-full md:w-auto flex items-center justify-center gap-3 bg-[#1e2da7] text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-blue-100 hover:bg-[#f06292] hover:scale-105 active:scale-95 transition-all"
