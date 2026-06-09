@@ -25,6 +25,7 @@ import OrganizerEventDetail from './pages/OrganizerEventDetail';
 import OrganizerCreateEvent from './pages/OrganizerCreateEvent';
 import EventCreationSuccess from './pages/EventCreationSuccess';
 import OrganizerSupport from './pages/OrganizerSupport'; 
+import Friends from './pages/Friends';
 
 function App() {
   // État global de connexion (simulé)
@@ -61,6 +62,7 @@ function App() {
             <Route path="/organizer/create" element={<OrganizerCreateEvent />} />
             <Route path="/organizer/create-success" element={<EventCreationSuccess />} />
             <Route path="/organizer/support" element={<OrganizerSupport />} />
+            <Route path="/friends" element={<Friends />} />
             <Route path="/organizer/profile" element={<OrganizerProfile />} />
           </Routes>
         </main>
