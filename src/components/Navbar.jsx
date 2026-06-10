@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Compass, ShieldCheck, UserCircle, MessageSquare, LayoutDashboard } from 'lucide-react'; 
+import { Search, Compass, ShieldCheck, UserCircle, MessageSquare, LayoutDashboard, Users } from 'lucide-react'; 
 import { Link } from 'react-router-dom';
 
 const Navbar = ({ isLoggedIn, isOrganizer }) => {
@@ -17,9 +17,10 @@ const Navbar = ({ isLoggedIn, isOrganizer }) => {
     navItems.push({ label: 'Organisateur', icon: <ShieldCheck size={24} />, path: '/organizer/login' });
   }
 
-  // 3. Item "Messages" (Client ou Pro)
+  // 3. Items "Messages" et "Amis" (Client ou Pro connecté)
   if (isLoggedIn) {
     navItems.push({ label: 'Messages', icon: <MessageSquare size={24} />, path: '/groups' });
+    navItems.push({ label: 'Amis', icon: <Users size={24} />, path: '/friends' });
   }
 
   // 4. Bouton Compte dynamique
