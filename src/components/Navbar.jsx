@@ -19,7 +19,7 @@ const Navbar = ({ isLoggedIn, isOrganizer }) => {
 
   // 3. Items "Messages" et "Amis" (Client ou Pro connecté)
   if (isLoggedIn) {
-    navItems.push({ label: 'Messages', icon: <MessageSquare size={24} />, path: '/groups' });
+    navItems.push({ label: 'Messages', icon: <MessageSquare size={24} />, path: '/messages' });
     navItems.push({ label: 'Amis', icon: <Users size={24} />, path: '/friends' });
   }
 

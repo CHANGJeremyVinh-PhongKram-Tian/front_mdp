@@ -50,7 +50,7 @@ function App() {
             <Route path="/ticket-detail/:id" element={<TicketDetail />} />
             <Route path="/account" element={<Settings setIsLoggedIn={setIsLoggedIn} />} />
             <Route path="/mentions-legales" element={<MentionsLegales />} />
-            <Route path="/groups" element={<GroupsList />} />
+            <Route path="/messages" element={<GroupsList />} />
             <Route path="/chat/:id" element={<ChatView />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/organizer/login" element={<OrganizerAuth />} />

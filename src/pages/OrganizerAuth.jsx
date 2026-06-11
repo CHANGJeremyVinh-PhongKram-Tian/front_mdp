@@ -1,16 +1,37 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Mail, Lock, User, ArrowRight, Building2 } from 'lucide-react';
+import axios from 'axios';
 
 const OrganizerAuth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Ici tu ajouteras ta logique Firebase ou API plus tard
-    // Pour l'instant, on simule la réussite vers le dashboard
-    navigate('/organizer/dashboard');
+    setError(null);
+
+    if (isLogin) {
+      try {
+        const response = await axios.post('http://localhost:8000/api/login', {
+          email,
+          password
+        });
+        
+        // Stocker le token
+        localStorage.setItem('auth_token', response.data.access_token);
+        
+        navigate('/organizer/dashboard');
+      } catch (err) {
+        setError("Identifiants incorrects ou erreur serveur.");
+      }
+    } else {
+      // Simulation pour l'inscription pour l'instant
+      navigate('/organizer/dashboard');
+    }
   };
 
   return (
@@ -33,6 +54,8 @@ const OrganizerAuth = () => {
         {/* Formulaire */}
         <div className="p-10">
           <form onSubmit={handleSubmit} className="space-y-5">
+            {error && <div className="text-red-500 text-sm font-bold text-center bg-red-50 p-3 rounded-xl">{error}</div>}
+            
             {!isLogin && (
               <div className="relative">
                 <User className="absolute left-4 top-3.5 text-gray-300" size={20} />
@@ -40,7 +63,6 @@ const OrganizerAuth = () => {
                   type="text" 
                   placeholder="Nom de l'organisation" 
                   className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#1e2da7] font-medium"
-                  required 
                 />
               </div>
             )}
@@ -49,6 +71,8 @@ const OrganizerAuth = () => {
               <Mail className="absolute left-4 top-3.5 text-gray-300" size={20} />
               <input 
                 type="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email professionnel" 
                 className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#1e2da7] font-medium"
                 required 
@@ -59,6 +83,8 @@ const OrganizerAuth = () => {
               <Lock className="absolute left-4 top-3.5 text-gray-300" size={20} />
               <input 
                 type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="Mot de passe" 
                 className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#1e2da7] font-medium"
                 required 
