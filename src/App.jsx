@@ -26,6 +26,7 @@ import OrganizerCreateEvent from './pages/OrganizerCreateEvent';
 import EventCreationSuccess from './pages/EventCreationSuccess';
 import OrganizerSupport from './pages/OrganizerSupport'; 
 import Friends from './pages/Friends';
+import AuthCallback from './pages/AuthCallback';
 import api from './utils/api';
 
 function App() {
@@ -82,6 +83,7 @@ function App() {
             <Route path="/search" element={<Search />} />
             <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} setIsOrganizer={setIsOrganizer} setUser={setUser} />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/auth/:provider/callback" element={<AuthCallback setIsLoggedIn={setIsLoggedIn} setIsOrganizer={setIsOrganizer} setUser={setUser} />} />
             <Route path="/event/:id" element={<EventDetails />} />
             <Route path="/payment/:id" element={<Payment />} />
             <Route path="/my-tickets" element={<MyTickets />} />
