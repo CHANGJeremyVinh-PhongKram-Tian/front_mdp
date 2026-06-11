@@ -1,9 +1,28 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Mail, Building2, Save, LogOut, Camera } from 'lucide-react';
+import { ArrowLeft, Mail, Building2, Save, LogOut, Camera } from 'lucide-react';
+import api from '../utils/api';
 
-const OrganizerProfile = () => {
+const OrganizerProfile = ({ user, setUser, setIsLoggedIn, setIsOrganizer }) => {
   const navigate = useNavigate();
+
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post('/logout');
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      localStorage.removeItem('auth_token');
+      setIsLoggedIn(false);
+      setIsOrganizer(false);
+      setUser(null);
+      navigate('/');
+    }
+  };
+
+  const displayName = user 
+    ? (user.organisateur ? user.organisateur.nom_structure : `${user.prenom} ${user.nom}`)
+    : 'Organisateur Pro';
 
   return (
     <div className="min-h-screen bg-[#f8f9fe] p-6 md:p-12 pb-32">
@@ -28,7 +47,7 @@ const OrganizerProfile = () => {
                 <Camera size={18} />
               </button>
             </div>
-            <h2 className="mt-4 text-xl font-black text-[#1e2da7] uppercase">Adrien Macaire</h2>
+            <h2 className="mt-4 text-xl font-black text-[#1e2da7] uppercase">{displayName}</h2>
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Organisateur Certifié</p>
           </div>
 
@@ -39,24 +58,32 @@ const OrganizerProfile = () => {
                 <label className="text-[10px] font-black uppercase text-gray-400 ml-4 tracking-widest">Nom complet / Agence</label>
                 <div className="relative">
                   <Building2 className="absolute left-4 top-4 text-gray-300" size={18} />
-                  <input type="text" defaultValue="Adrien Macaire" className="w-full pl-12 pr-6 py-4 bg-gray-50 border border-transparent rounded-2xl font-bold focus:bg-white focus:border-[#1e2da7] outline-none transition-all" />
+                  <input 
+                    type="text" 
+                    defaultValue={displayName} 
+                    className="w-full pl-12 pr-6 py-4 bg-gray-50 border border-transparent rounded-2xl font-bold focus:bg-white focus:border-[#1e2da7] outline-none transition-all" 
+                  />
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase text-gray-400 ml-4 tracking-widest">Email professionnel</label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-4 text-gray-300" size={18} />
-                  <input type="email" defaultValue="sparkupevents69@gmail.com" className="w-full pl-12 pr-6 py-4 bg-gray-50 border border-transparent rounded-2xl font-bold focus:bg-white focus:border-[#1e2da7] outline-none transition-all" />
+                  <input 
+                    type="email" 
+                    defaultValue={user ? user.email : ''} 
+                    className="w-full pl-12 pr-6 py-4 bg-gray-50 border border-transparent rounded-2xl font-bold focus:bg-white focus:border-[#1e2da7] outline-none transition-all" 
+                  />
                 </div>
               </div>
             </div>
 
             <div className="pt-6 border-t border-gray-50 flex flex-col md:flex-row gap-4">
-              <button type="submit" className="flex-1 bg-[#1e2da7] text-white py-5 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-[#f06292] transition-all shadow-lg shadow-blue-100">
+              <button type="button" className="flex-1 bg-[#1e2da7] text-white py-5 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-[#f06292] transition-all shadow-lg shadow-blue-100">
                 <Save size={20} /> Enregistrer
               </button>
               <button 
-                onClick={() => navigate('/login')} 
+                onClick={handleLogout} 
                 className="flex-1 bg-red-50 text-red-500 py-5 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-red-500 hover:text-white transition-all"
               >
                 <LogOut size={20} /> Déconnexion

@@ -1,14 +1,42 @@
-import React from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
+import api from '../utils/api';
 
-const Login = ({ setIsLoggedIn }) => {
+const Login = ({ setIsLoggedIn, setIsOrganizer, setUser }) => {
   const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setIsLoggedIn(true);
-    navigate('/');
+    setError(null);
+
+    try {
+      const response = await api.post('/login', {
+        email,
+        password,
+      });
+
+      localStorage.setItem('auth_token', response.data.access_token);
+      setUser(response.data.user);
+      setIsLoggedIn(true);
+      setIsOrganizer(!!response.data.user.organisateur);
+
+      if (response.data.user.organisateur) {
+        navigate('/organizer/dashboard');
+      } else {
+        navigate('/');
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(
+        err.response?.data?.message || 
+        err.response?.data?.errors?.email?.[0] || 
+        "Identifiants incorrects ou erreur de connexion."
+      );
+    }
   };
 
   return (
@@ -20,13 +48,33 @@ const Login = ({ setIsLoggedIn }) => {
         </div>
 
         <form onSubmit={handleLogin} className="p-8 space-y-4">
+          {error && (
+            <div className="text-red-500 text-xs font-bold text-center bg-red-50 p-3 rounded-xl border border-red-100">
+              {error}
+            </div>
+          )}
+          
           <div className="relative">
             <Mail className="absolute left-3 top-3 text-gray-400" size={20} />
-            <input type="email" placeholder="Email" className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#1e2da7]" required />
+            <input 
+              type="email" 
+              placeholder="Email" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#1e2da7]" 
+              required 
+            />
           </div>
           <div className="relative">
             <Lock className="absolute left-3 top-3 text-gray-400" size={20} />
-            <input type="password" placeholder="Mot de passe" className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#1e2da7]" required />
+            <input 
+              type="password" 
+              placeholder="Mot de passe" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#1e2da7]" 
+              required 
+            />
           </div>
 
           <button type="submit" className="w-full py-4 bg-[#1e2da7] text-white font-bold rounded-xl hover:bg-[#f06292] transition-all flex items-center justify-center gap-2">

@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Mail, Lock, User, ArrowRight, Building2 } from 'lucide-react';
-import axios from 'axios';
+import { Mail, Lock, ArrowRight, Building2 } from 'lucide-react';
+import api from '../utils/api';
 
-const OrganizerAuth = () => {
+const OrganizerAuth = ({ setIsLoggedIn, setIsOrganizer, setUser }) => {
   const [isLogin, setIsLogin] = useState(true);
+  const [nomStructure, setNomStructure] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
@@ -16,21 +17,45 @@ const OrganizerAuth = () => {
 
     if (isLogin) {
       try {
-        const response = await axios.post('http://localhost:8000/api/login', {
+        const response = await api.post('/login', {
           email,
           password
         });
         
-        // Stocker le token
         localStorage.setItem('auth_token', response.data.access_token);
+        setUser(response.data.user);
+        setIsLoggedIn(true);
+        setIsOrganizer(!!response.data.user.organisateur);
         
         navigate('/organizer/dashboard');
       } catch (err) {
+        console.error("Pro Login error:", err);
         setError("Identifiants incorrects ou erreur serveur.");
       }
     } else {
-      // Simulation pour l'inscription pour l'instant
-      navigate('/organizer/dashboard');
+      try {
+        const response = await api.post('/register', {
+          nom: 'Organisateur',
+          prenom: 'Pro',
+          email,
+          password,
+          nom_structure: nomStructure
+        });
+
+        localStorage.setItem('auth_token', response.data.access_token);
+        setUser(response.data.user);
+        setIsLoggedIn(true);
+        setIsOrganizer(true);
+
+        navigate('/organizer/dashboard');
+      } catch (err) {
+        console.error("Pro Register error:", err);
+        setError(
+          err.response?.data?.message || 
+          err.response?.data?.errors?.email?.[0] || 
+          "Erreur lors de la création du compte Pro."
+        );
+      }
     }
   };
 
@@ -58,11 +83,14 @@ const OrganizerAuth = () => {
             
             {!isLogin && (
               <div className="relative">
-                <User className="absolute left-4 top-3.5 text-gray-300" size={20} />
+                <Building2 className="absolute left-4 top-3.5 text-gray-300" size={20} />
                 <input 
                   type="text" 
+                  value={nomStructure}
+                  onChange={(e) => setNomStructure(e.target.value)}
                   placeholder="Nom de l'organisation" 
                   className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#1e2da7] font-medium"
+                  required
                 />
               </div>
             )}

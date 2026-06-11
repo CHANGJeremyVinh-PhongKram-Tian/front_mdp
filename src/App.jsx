@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -26,11 +26,49 @@ import OrganizerCreateEvent from './pages/OrganizerCreateEvent';
 import EventCreationSuccess from './pages/EventCreationSuccess';
 import OrganizerSupport from './pages/OrganizerSupport'; 
 import Friends from './pages/Friends';
+import api from './utils/api';
 
 function App() {
-  // État global de connexion (simulé)
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const [isOrganizer, setIsOrganizer] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isOrganizer, setIsOrganizer] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await api.get('/user');
+        setUser(response.data);
+        setIsLoggedIn(true);
+        setIsOrganizer(!!response.data.organisateur);
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        localStorage.removeItem('auth_token');
+        setUser(null);
+        setIsLoggedIn(false);
+        setIsOrganizer(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
+        <div className="w-16 h-16 border-4 border-t-[#1e2da7] border-r-transparent border-b-[#f06292] border-l-transparent rounded-full animate-spin"></div>
+        <p className="text-gray-500 font-bold uppercase tracking-wider text-xs mt-4">Chargement de SparkUp...</p>
+      </div>
+    );
+  }
 
   return (
     <Router>
@@ -42,19 +80,19 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/search" element={<Search />} />
-            <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
+            <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} setIsOrganizer={setIsOrganizer} setUser={setUser} />} />
             <Route path="/register" element={<Register />} />
             <Route path="/event/:id" element={<EventDetails />} />
             <Route path="/payment/:id" element={<Payment />} />
             <Route path="/my-tickets" element={<MyTickets />} />
             <Route path="/ticket-detail/:id" element={<TicketDetail />} />
-            <Route path="/account" element={<Settings setIsLoggedIn={setIsLoggedIn} />} />
+            <Route path="/account" element={<Settings isLoggedIn={isLoggedIn} user={user} setUser={setUser} setIsLoggedIn={setIsLoggedIn} setIsOrganizer={setIsOrganizer} />} />
             <Route path="/mentions-legales" element={<MentionsLegales />} />
             <Route path="/messages" element={<GroupsList />} />
             <Route path="/chat/:id" element={<ChatView />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
-            <Route path="/organizer/login" element={<OrganizerAuth />} />
-            <Route path="/organizer/dashboard" element={<OrganizerDashboard />} />
+            <Route path="/organizer/login" element={<OrganizerAuth setIsLoggedIn={setIsLoggedIn} setIsOrganizer={setIsOrganizer} setUser={setUser} />} />
+            <Route path="/organizer/dashboard" element={<OrganizerDashboard user={user} />} />
             <Route path="/organizer/stats/revenue" element={<OrganizerRevenue />} />
             <Route path="/organizer/stats/tickets" element={<OrganizerTickets />} />
             <Route path="/organizer/stats/engagement" element={<OrganizerEngagement />} />
@@ -63,7 +101,7 @@ function App() {
             <Route path="/organizer/create-success" element={<EventCreationSuccess />} />
             <Route path="/organizer/support" element={<OrganizerSupport />} />
             <Route path="/friends" element={<Friends />} />
-            <Route path="/organizer/profile" element={<OrganizerProfile />} />
+            <Route path="/organizer/profile" element={<OrganizerProfile user={user} setUser={setUser} setIsLoggedIn={setIsLoggedIn} setIsOrganizer={setIsOrganizer} />} />
           </Routes>
         </main>
         

@@ -1,13 +1,22 @@
-import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { User, Mail, Ticket, LogOut, ChevronRight, Shield, Bell } from 'lucide-react';
+import { User, Mail, Ticket, LogOut, ChevronRight, Shield } from 'lucide-react';
+import api from '../utils/api';
 
-const Settings = ({ setIsLoggedIn }) => {
+const Settings = ({ user, setUser, setIsLoggedIn, setIsOrganizer }) => {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await api.post('/logout');
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      localStorage.removeItem('auth_token');
+      setIsLoggedIn(false);
+      setIsOrganizer(false);
+      setUser(null);
+      navigate('/');
+    }
   };
 
   return (
@@ -20,8 +29,8 @@ const Settings = ({ setIsLoggedIn }) => {
           <User size={40} />
         </div>
         <div>
-          <h2 className="text-xl font-black text-gray-900">Adrien Macaire</h2>
-          <p className="text-gray-500 text-sm">Développeur Full-stack</p>
+          <h2 className="text-xl font-black text-gray-900">{user ? `${user.prenom} ${user.nom}` : 'Utilisateur'}</h2>
+          <p className="text-gray-500 text-sm">Membre SparkUp</p>
         </div>
       </div>
 
@@ -47,7 +56,7 @@ const Settings = ({ setIsLoggedIn }) => {
             </div>
             <div>
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Email</p>
-              <p className="font-bold">adrien.macaire@example.com</p>
+              <p className="font-bold">{user ? user.email : ''}</p>
             </div>
           </div>
         </div>

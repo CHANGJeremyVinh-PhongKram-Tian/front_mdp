@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import { 
   ArrowLeft, 
   Image as ImageIcon, 
@@ -66,15 +66,12 @@ const OrganizerCreateEvent = () => {
         data.append('affiche', imageFile);
       }
 
-      const token = localStorage.getItem('auth_token');
-
       console.log("Tentative d'envoi du FormData au backend");
 
-      const response = await axios.post('http://localhost:8000/api/evenements', data, {
+      const response = await api.post('/evenements', data, {
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'multipart/form-data'
         },
         timeout: 10000 // Timeout de 10 secondes pour éviter de rester bloqué
       });
