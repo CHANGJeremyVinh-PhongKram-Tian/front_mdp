@@ -74,8 +74,6 @@ function App() {
   return (
     <Router>
       <div className="flex flex-col min-h-screen bg-gray-50">
-        {/* On passe l'état à la Navbar pour changer le texte du bouton */}
-        <Navbar isLoggedIn={isLoggedIn} isOrganizer={isOrganizer}/>
         
         <main className="flex-grow pb-20 md:pb-0">
           <Routes>
@@ -106,8 +104,6 @@ function App() {
             <Route path="/organizer/profile" element={<OrganizerProfile user={user} setUser={setUser} setIsLoggedIn={setIsLoggedIn} setIsOrganizer={setIsOrganizer} />} />
           </Routes>
         </main>
-        
-        <Footer />
       </div>
     </Router>
   );
