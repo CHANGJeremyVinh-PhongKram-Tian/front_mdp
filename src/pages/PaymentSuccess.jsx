@@ -64,7 +64,7 @@ const PaymentSuccess = () => {
           </Link>
 
           <Link 
-            to="/groups" 
+            to="/messages" 
             className="w-full bg-white border-2 border-[#1e2da7] text-[#1e2da7] py-5 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-blue-50 transition-all"
           >
             <MessageSquare size={20} /> Retour au chat

@@ -1,125 +1,319 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, CreditCard, Check, X } from 'lucide-react';
-import { allEvents } from '../data/events';
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, Camera, Mic, Plus, Calendar, ShieldCheck, Users } from 'lucide-react';
 
 const ChatView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [showPayMenu, setShowPayMenu] = useState(false);
-  
-  const messages = [
-    { id: 1, user: "Lucas", text: "Salut l'équipe ! On est combien pour le match ?", time: "14:02", isMe: false, avatar: "https://i.pravatar.cc/150?u=lucas" },
-    { id: 2, user: "Moi", text: "On est 4 normalement. J'ai vu qu'il restait des places en tribune Nord.", time: "14:05", isMe: true },
-    { id: 3, user: "Sarah", text: "Top ! Adrien, tu peux t'occuper de prendre les billets pour tout le monde ? On te rembourse après !", time: "14:06", isMe: false, avatar: "https://i.pravatar.cc/150?u=sarah" },
-  ];
+  const bottomRef = useRef(null);
+  const isGroup = id.startsWith('group_');
 
-  const [members, setMembers] = useState([
-    { id: 'me', name: "Moi", avatar: "https://i.pravatar.cc/150?u=adrien", selected: true },
-    { id: 1, name: "Lucas", avatar: "https://i.pravatar.cc/150?u=lucas", selected: false },
-    { id: 2, name: "Sarah", avatar: "https://i.pravatar.cc/150?u=sarah", selected: false },
-    { id: 3, name: "Hugo", avatar: "https://i.pravatar.cc/150?u=hugo", selected: false },
-  ]);
-
-  const toggleMember = (memberId) => {
-    setMembers(members.map(m => m.id === memberId ? { ...m, selected: !m.selected } : m));
+  // 1. Charger les données du contact ou du groupe
+  const getChatDetails = () => {
+    if (isGroup) {
+      const savedGroups = localStorage.getItem('sparkup_groups');
+      if (savedGroups) {
+        const groups = JSON.parse(savedGroups);
+        const group = groups.find(g => g.id === id);
+        if (group) return { name: group.name, subtitle: `${group.members.length} membres`, avatar: group.image, code: group.code, members: group.members };
+      }
+      return { 
+        name: "Groupe soirée After School", 
+        subtitle: "6 membres", 
+        avatar: "https://i.pravatar.cc/150?u=after_school", 
+        code: "AFTER-SCHOOL-2026",
+        members: [
+          { id: 101, name: "Killian", username: "@kiki.pt06200", image: "https://i.pravatar.cc/150?u=killian1" },
+          { id: 102, name: "Killian", username: "@kiki.pt06200", image: "https://i.pravatar.cc/150?u=killian2" }
+        ]
+      };
+    } else {
+      if (id === '2') return { name: "Sarah", subtitle: "@sarah.lyon", avatar: "https://i.pravatar.cc/150?u=sarah" };
+      if (id === '3') return { name: "Hugo", subtitle: "@hugo.boss", avatar: "https://i.pravatar.cc/150?u=hugo" };
+      return { name: "Killian", subtitle: "@kiki.pt06200", avatar: "https://i.pravatar.cc/150?u=killian" };
+    }
   };
 
-  const selectedCount = members.filter(m => m.selected).length;
-  const event = allEvents.find(e => e.id === parseInt(id));
-  const pricePerTicket = event ? parseInt(event.price) : 0;
+  const chatInfo = getChatDetails();
+
+  // 2. Messages initiaux
+  const getInitialMessages = () => {
+    const getPastDate = (daysAgo) => {
+      const d = new Date();
+      d.setDate(d.getDate() - daysAgo);
+      return d.toISOString();
+    };
+
+    if (isGroup) {
+      return [
+        {
+          id: 1,
+          text: `Groupe créé. Code d'invitation : ${chatInfo.code}`,
+          isSystem: true,
+          timestamp: getPastDate(2)
+        },
+        {
+          id: 2,
+          text: "Slt tout le monde ! Vous êtes chauds pour la soirée After School ?",
+          isMe: false,
+          senderName: "Killian",
+          avatar: "https://i.pravatar.cc/150?u=killian1",
+          timestamp: getPastDate(1)
+        },
+        {
+          id: 3,
+          text: "Grave ! Moi il me faut une prévente",
+          isMe: false,
+          senderName: "Killian",
+          avatar: "https://i.pravatar.cc/150?u=killian2",
+          timestamp: getPastDate(1)
+        },
+        {
+          id: 4,
+          text: "Je vais nous prendre les places via le paiement de groupe !",
+          isMe: true,
+          senderName: "Moi",
+          avatar: "https://i.pravatar.cc/150?u=moi",
+          timestamp: getPastDate(0)
+        }
+      ];
+    } else {
+      return [
+        { 
+          id: 1, 
+          text: "Slt frérot, ouais je te prends les places pas", 
+          isMe: false, 
+          avatar: chatInfo.avatar,
+          timestamp: getPastDate(1)
+        },
+        { 
+          id: 2, 
+          text: "Slt frérot, ouais je te prends les places pas de soucis", 
+          isMe: true,
+          timestamp: getPastDate(1)
+        },
+        { 
+          id: 3, 
+          text: "Ceci est le billet pour : Soirée After School pour killian.", 
+          isTicket: true, 
+          isMe: true,
+          timestamp: getPastDate(0)
+        }
+      ];
+    }
+  };
+
+  // État local des messages
+  const [messages, setMessages] = useState(() => {
+    const saved = localStorage.getItem(`chat_messages_${id}`);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    return getInitialMessages();
+  });
+
+  const [inputText, setInputText] = useState("");
+
+  // Sauvegarde et scroll
+  useEffect(() => {
+    localStorage.setItem(`chat_messages_${id}`, JSON.stringify(messages));
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, id]);
+
+  const handleSend = () => {
+    if (!inputText.trim()) return;
+    
+    let isMe = true;
+    let text = inputText.trim();
+    let avatar = null;
+    let senderName = "Moi";
+
+    // Simulation de réception de message
+    if (text.startsWith("/killian ")) {
+      isMe = false;
+      text = text.replace("/killian ", "");
+      avatar = "https://i.pravatar.cc/150?u=killian1";
+      senderName = "Killian";
+    }
+
+    const newMessage = {
+      id: Date.now(),
+      text,
+      isMe,
+      senderName,
+      avatar: isMe ? null : (avatar || chatInfo.avatar),
+      timestamp: new Date().toISOString()
+    };
+
+    setMessages([...messages, newMessage]);
+    setInputText("");
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSend();
+    }
+  };
 
   return (
-    /* MODIFICATION ICI :
-       - On applique m-3 (marge) et rounded-[2.5rem] (gros arrondis) pour TOUTES les vues.
-       - h-[calc(100vh-120px)] : On réduit encore un peu la hauteur pour laisser respirer les marges.
-    */
-    <div className="flex flex-col h-[calc(100vh-130px)] md:h-[calc(100vh-100px)] bg-gray-50 max-w-2xl mx-auto relative overflow-hidden shadow-2xl m-3 rounded-[2.5rem] border border-gray-100">
+    <div className="flex flex-col h-screen max-w-md mx-auto bg-gradient-to-b from-[#f3ebfc] via-[#f9f8ff] to-[#fcf0cd] relative overflow-hidden font-sans">
       
-      {/* --- HEADER --- */}
-      <div className="bg-white p-5 border-b border-gray-50 flex items-center gap-4 sticky top-0 z-10">
-        <button onClick={() => navigate('/groups')} className="text-gray-400 hover:text-[#1e2da7] transition-colors">
-          <ArrowLeft size={24} />
-        </button>
-        <div>
-          <h1 className="font-black text-[#1e2da7] uppercase text-xs tracking-tighter">La commu OL</h1>
-          <p className="text-[9px] text-green-500 font-bold uppercase tracking-widest">En ligne</p>
+      {/* Header Bar */}
+      <div className="flex items-center justify-between px-4 py-3 relative z-50 bg-white/40 backdrop-blur-md border-b border-gray-100">
+        <Link to="/messages" className="p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 flex items-center justify-center">
+          <ArrowLeft size={20} className="text-black font-bold" />
+        </Link>
+        <div className="flex items-center gap-2 flex-grow justify-center -ml-8">
+          <img src={chatInfo.avatar} alt="Avatar" className="w-9 h-9 rounded-full object-cover border border-gray-200" />
+          <div className="flex flex-col items-start leading-tight">
+            <span className="font-bold text-sm text-black flex items-center gap-1">
+              {chatInfo.name} <span className="text-gray-400 text-xs">{'>'}</span>
+            </span>
+            <span className="text-[10px] text-gray-500 font-semibold">{chatInfo.subtitle}</span>
+          </div>
         </div>
       </div>
 
-      {/* --- ZONE DE MESSAGES --- */}
-      <div className="flex-grow p-6 overflow-y-auto space-y-4 bg-[#f8f9fe]">
-        {messages.map((msg) => (
-          <div key={msg.id} className={`flex ${msg.isMe ? 'justify-end' : 'justify-start'} items-end gap-2`}>
-            {!msg.isMe && <img src={msg.avatar} alt="" className="w-8 h-8 rounded-full mb-1 border border-gray-100" />}
-            <div className={`max-w-[75%] flex flex-col ${msg.isMe ? 'items-end' : 'items-start'}`}>
-              {!msg.isMe && <span className="text-[10px] font-black text-gray-400 ml-2 mb-1 uppercase tracking-wider">{msg.user}</span>}
-              <div className={`p-4 rounded-[1.8rem] text-sm font-medium shadow-sm ${msg.isMe ? 'bg-[#1e2da7] text-white rounded-br-none' : 'bg-white text-gray-700 rounded-bl-none border border-gray-100'}`}>
-                {msg.text}
+      {/* Hero Profile Area */}
+      <div className="flex flex-col items-center justify-center mt-6 mb-4 z-10">
+        <img 
+          src={chatInfo.avatar} 
+          alt="Avatar Grand" 
+          className="w-24 h-24 rounded-full object-cover shadow-lg border-2 border-white bg-purple-100"
+        />
+        <h2 className="font-extrabold text-xl mt-3 text-gray-800 text-center px-4">{chatInfo.name}</h2>
+        <p className="text-xs text-gray-400 font-semibold mt-1">
+          {isGroup ? `Code d'invitation : ${chatInfo.code}` : chatInfo.subtitle}
+        </p>
+      </div>
+
+      {/* Messages Area */}
+      <div className="flex-grow overflow-y-auto px-4 space-y-4 pb-28 z-10 scrollbar-hide">
+        {messages.map((msg) => {
+          // Message système
+          if (msg.isSystem) {
+            return (
+              <div key={msg.id} className="flex justify-center my-2">
+                <span className="bg-gray-200/70 backdrop-blur-sm text-gray-600 text-[11px] font-bold px-4 py-1.5 rounded-full shadow-sm border border-gray-100">
+                  {msg.text}
+                </span>
+              </div>
+            );
+          }
+
+          // Message d'achat groupé
+          if (msg.isGroupPaymentNotice) {
+            return (
+              <div key={msg.id} className="flex justify-center my-3">
+                <div className="bg-white rounded-2xl p-4 shadow-md border-t-4 border-[#9146ff] text-sm flex flex-col items-center max-w-[90%]">
+                  <div className="bg-[#f3ebfc] text-[#9146ff] p-2 rounded-full mb-2">
+                    <Users size={20} />
+                  </div>
+                  <p className="text-gray-800 font-bold text-center mb-1 text-xs">ACHAT DE GROUPE CONFIRMÉ</p>
+                  <p className="text-gray-600 text-center text-xs">{msg.text}</p>
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <div key={msg.id} className={`flex ${msg.isMe ? 'justify-end' : 'justify-start'} items-end gap-2`}>
+              
+              {!msg.isMe && (
+                <img 
+                  src={msg.avatar || "https://i.pravatar.cc/150?u=default"} 
+                  alt="" 
+                  className="w-8 h-8 rounded-full object-cover shadow-sm bg-purple-100" 
+                />
+              )}
+
+              {/* Bubble Rendering */}
+              <div className={`max-w-[75%] flex flex-col`}>
+                
+                {/* Afficher le nom de l'expéditeur dans un groupe */}
+                {isGroup && !msg.isMe && (
+                  <span className="text-[10px] text-gray-500 font-bold ml-2 mb-0.5">
+                    {msg.senderName}
+                  </span>
+                )}
+                
+                {!msg.isTicket ? (
+                  <div 
+                    className={`px-4 py-3 text-sm font-medium shadow-sm 
+                      ${msg.isMe 
+                        ? 'bg-white text-gray-800 rounded-2xl rounded-br-sm border border-gray-100' 
+                        : 'bg-[#9146ff] text-white rounded-2xl rounded-bl-sm'
+                      }
+                    `}
+                  >
+                    {msg.text}
+                  </div>
+                ) : (
+                  /* Widget de Billet */
+                  <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-sm flex flex-col items-center">
+                    <p className="text-gray-800 font-medium mb-3">{msg.text}</p>
+                    
+                    <div className="w-full rounded-xl p-4 border border-gray-100 flex flex-col items-center shadow-sm">
+                      <h3 className="font-bold text-xs mb-3 text-center uppercase tracking-tight text-gray-800">
+                        LUTHER - Lyon - Transbordeur
+                      </h3>
+                      
+                      <img 
+                        src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Ticket-Luther-Lyon" 
+                        alt="QR Code" 
+                        className="w-32 h-32 mb-1" 
+                      />
+                      
+                      <p className="text-[10px] text-gray-400 mb-4 tracking-wider">
+                        42389014713514 - 31,99 €
+                      </p>
+                      
+                      <div className="w-full flex justify-between items-center text-[10px] text-gray-600 font-semibold border-t pt-2 border-gray-100">
+                        <span>ven 4 déc.</span>
+                        <span>20:00 - 22:30</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
+        <div ref={bottomRef} />
       </div>
 
-      {/* --- TIROIR DE PAIEMENT --- */}
-      <div 
-        className={`absolute inset-0 bg-black/40 transition-opacity z-20 ${showPayMenu ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-        onClick={() => setShowPayMenu(false)}
-      />
-      
-      <div className={`absolute inset-x-0 bottom-0 bg-white rounded-t-[3rem] shadow-2xl transition-transform duration-500 z-30 ${showPayMenu ? 'translate-y-0' : 'translate-y-full'}`}>
-        <div className="p-8 pb-10">
-          <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6" />
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="font-black text-[#1e2da7] uppercase tracking-tighter text-xl italic">Check-out Groupe</h2>
-            <button onClick={() => setShowPayMenu(false)} className="bg-gray-100 p-2 rounded-full text-gray-400"><X size={20}/></button>
-          </div>
-
-          <div className="space-y-3 max-h-52 overflow-y-auto mb-8 pr-2">
-            {members.map(member => (
-              <div 
-                key={member.id}
-                onClick={() => toggleMember(member.id)}
-                className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all cursor-pointer ${member.selected ? 'border-[#1e2da7] bg-blue-50' : 'border-gray-50 bg-white hover:border-gray-200'}`}
-              >
-                <div className="flex items-center gap-4">
-                  <img src={member.avatar} alt="" className="w-10 h-10 rounded-full border-2 border-white shadow-sm" />
-                  <span className={`font-bold ${member.selected ? 'text-[#1e2da7]' : 'text-gray-600'}`}>{member.name}</span>
-                </div>
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${member.selected ? 'bg-[#1e2da7] border-[#1e2da7]' : 'border-gray-200'}`}>
-                  {member.selected && <Check size={14} className="text-white" />}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <button 
-            onClick={() => navigate(`/payment/${id}?count=${selectedCount}`)}
-            className="w-full py-5 bg-[#1e2da7] text-white rounded-[1.5rem] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-transform"
-          >
-            Confirmer {selectedCount * pricePerTicket}€
+      {/* Bottom Input Bar */}
+      <div className="absolute bottom-0 inset-x-0 bg-transparent px-4 py-4 pb-8 z-20">
+        <div className="bg-white rounded-full p-2 flex items-center gap-3 shadow-lg border border-gray-100">
+          
+          <button className="bg-[#9146ff] p-2.5 rounded-full text-white shadow-md flex items-center justify-center shrink-0">
+            <Camera size={20} />
           </button>
+          
+          <input 
+            type="text" 
+            placeholder="Message..." 
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="flex-grow bg-transparent border-none outline-none text-sm text-gray-700 placeholder-gray-400" 
+          />
+          
+          <button className="text-gray-400 hover:text-gray-600 p-1 shrink-0 mr-2">
+            <Mic size={22} className="w-5 h-5" />
+          </button>
+          
+          <button className="text-gray-400 hover:text-gray-600 p-1 shrink-0 mr-1">
+            <Plus size={22} className="w-5 h-5" />
+          </button>
+
         </div>
       </div>
 
-      {/* --- BARRE D'ENTRÉE --- */}
-      <div className="bg-white p-4 border-t border-gray-50 flex items-center gap-3 sticky bottom-0">
-        <button 
-          onClick={() => setShowPayMenu(true)}
-          className="p-3 bg-[#f06292] text-white rounded-2xl shadow-lg hover:scale-105 active:scale-95 transition-all"
-        >
-          <CreditCard size={24} />
-        </button>
-        <input 
-          type="text" 
-          placeholder="Message..." 
-          className="flex-grow bg-gray-50 border-none rounded-2xl px-4 py-3 outline-none text-sm" 
-        />
-        <button className="bg-[#1e2da7] text-white p-3 rounded-2xl hover:bg-blue-800">
-          <Send size={24} />
-        </button>
-      </div>
+      {/* iOS Home Indicator */}
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-black rounded-full z-30 opacity-80" />
+      
     </div>
   );
 };

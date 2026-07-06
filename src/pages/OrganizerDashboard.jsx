@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
 import { 
   TrendingUp, 
   Zap, // Remplaçant pour l'engagement
@@ -9,21 +9,49 @@ import {
   MoreHorizontal
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import api from '../utils/api';
 
-const OrganizerDashboard = () => {
+const OrganizerDashboard = ({ user }) => {
   const navigate = useNavigate();
+  const [statsData, setStatsData] = useState(null);
+  const [myEvents, setMyEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Data simulée avec paths de redirection
+  const organizerId = user?.organisateur?.id_organisateur || 1; 
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [statsRes, eventsRes] = await Promise.all([
+          api.get(`/organizer/${organizerId}/dashboard-stats`),
+          api.get(`/organizer/${organizerId}/events`)
+        ]);
+        setStatsData(statsRes.data);
+        setMyEvents(eventsRes.data);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des données:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [organizerId]);
+
   const stats = [
-    { id: 1, label: 'Chiffre d\'affaires', value: '12 450€', icon: <TrendingUp size={24} />, color: 'text-green-600', bg: 'bg-green-100', trend: '+12.5%', path: '/organizer/stats/revenue' },
-    { id: 2, label: 'Billets vendus', value: '842', icon: <Ticket size={24} />, color: 'text-blue-600', bg: 'bg-blue-100', trend: '+5.2%', path: '/organizer/stats/tickets' },
-    { id: 3, label: 'Taux d\'engagement', value: '68%', icon: <Zap size={24} />, color: 'text-pink-600', bg: 'bg-pink-100', trend: '+18.7%', path: '/organizer/stats/engagement' },
+    { id: 1, label: 'Chiffre d\'affaires', value: statsData?.revenue?.value || '0€', icon: <TrendingUp size={24} />, color: 'text-green-600', bg: 'bg-green-100', trend: statsData?.revenue?.trend || '0%', path: '/organizer/stats/revenue' },
+    { id: 2, label: 'Billets vendus', value: statsData?.tickets?.value || '0', icon: <Ticket size={24} />, color: 'text-blue-600', bg: 'bg-blue-100', trend: statsData?.tickets?.trend || '0%', path: '/organizer/stats/tickets' },
+    { id: 3, label: 'Taux d\'engagement', value: statsData?.engagement?.value || '0%', icon: <Zap size={24} />, color: 'text-pink-600', bg: 'bg-pink-100', trend: statsData?.engagement?.trend || '0%', path: '/organizer/stats/engagement' },
   ];
 
-  const myEvents = [
-    { id: 1, title: 'OL - PSG', date: '16 Mai 2026', sold: 450, total: 500, status: 'Presque complet' },
-    { id: 2, title: 'Festival Electro Lyon', date: '22 Juin 2026', sold: 1200, total: 3000, status: 'En cours' },
-  ];
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#f8f9fe] flex flex-col items-center justify-center p-6">
+        <div className="w-16 h-16 border-4 border-t-[#1e2da7] border-r-transparent border-b-[#f06292] border-l-transparent rounded-full animate-spin"></div>
+        <p className="text-gray-500 font-bold uppercase tracking-wider text-xs mt-4">Chargement du Dashboard...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f8f9fe] p-6 md:p-12 pb-24 md:pb-12">
