@@ -28,6 +28,7 @@ import OrganizerSupport from './pages/OrganizerSupport';
 import Friends from './pages/Friends';
 import AuthCallback from './pages/AuthCallback';
 import api from './utils/api';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -72,40 +73,42 @@ function App() {
   }
 
   return (
-    <Router>
-      <div className="flex flex-col min-h-screen bg-gray-50">
-        
-        <main className="flex-grow pb-20 md:pb-0">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/search" element={<Search />} />
-            <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} setIsOrganizer={setIsOrganizer} setUser={setUser} />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/auth/:provider/callback" element={<AuthCallback setIsLoggedIn={setIsLoggedIn} setIsOrganizer={setIsOrganizer} setUser={setUser} />} />
-            <Route path="/event/:id" element={<EventDetails />} />
-            <Route path="/payment/:id" element={<Payment />} />
-            <Route path="/my-tickets" element={<MyTickets />} />
-            <Route path="/ticket-detail/:id" element={<TicketDetail />} />
-            <Route path="/account" element={<Settings isLoggedIn={isLoggedIn} user={user} setUser={setUser} setIsLoggedIn={setIsLoggedIn} setIsOrganizer={setIsOrganizer} />} />
-            <Route path="/mentions-legales" element={<MentionsLegales />} />
-            <Route path="/messages" element={<GroupsList />} />
-            <Route path="/chat/:id" element={<ChatView />} />
-            <Route path="/payment-success" element={<PaymentSuccess />} />
-            <Route path="/organizer/login" element={<OrganizerAuth setIsLoggedIn={setIsLoggedIn} setIsOrganizer={setIsOrganizer} setUser={setUser} />} />
-            <Route path="/organizer/dashboard" element={<OrganizerDashboard user={user} />} />
-            <Route path="/organizer/stats/revenue" element={<OrganizerRevenue />} />
-            <Route path="/organizer/stats/tickets" element={<OrganizerTickets />} />
-            <Route path="/organizer/stats/engagement" element={<OrganizerEngagement />} />
-            <Route path="/organizer/event/:id" element={<OrganizerEventDetail />} />
-            <Route path="/organizer/create" element={<OrganizerCreateEvent />} />
-            <Route path="/organizer/create-success" element={<EventCreationSuccess />} />
-            <Route path="/organizer/support" element={<OrganizerSupport />} />
-            <Route path="/friends" element={<Friends />} />
-            <Route path="/organizer/profile" element={<OrganizerProfile user={user} setUser={setUser} setIsLoggedIn={setIsLoggedIn} setIsOrganizer={setIsOrganizer} />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
+    <ThemeProvider>
+      <Router>
+        <div className="flex flex-col min-h-screen bg-gray-50">
+          
+          <main className="flex-grow pb-20 md:pb-0">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} setIsOrganizer={setIsOrganizer} setUser={setUser} />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/auth/:provider/callback" element={<AuthCallback setIsLoggedIn={setIsLoggedIn} setIsOrganizer={setIsOrganizer} setUser={setUser} />} />
+              <Route path="/event/:id" element={<EventDetails />} />
+              <Route path="/payment/:id" element={<Payment />} />
+              <Route path="/my-tickets" element={<MyTickets />} />
+              <Route path="/ticket-detail/:id" element={<TicketDetail />} />
+              <Route path="/account" element={<Settings isLoggedIn={isLoggedIn} user={user} setUser={setUser} setIsLoggedIn={setIsLoggedIn} setIsOrganizer={setIsOrganizer} />} />
+              <Route path="/mentions-legales" element={<MentionsLegales />} />
+              <Route path="/messages" element={<GroupsList />} />
+              <Route path="/chat/:id" element={<ChatView />} />
+              <Route path="/payment-success" element={<PaymentSuccess />} />
+              <Route path="/organizer/login" element={<OrganizerAuth setIsLoggedIn={setIsLoggedIn} setIsOrganizer={setIsOrganizer} setUser={setUser} />} />
+              <Route path="/organizer/dashboard" element={<OrganizerDashboard user={user} />} />
+              <Route path="/organizer/stats/revenue" element={<OrganizerRevenue />} />
+              <Route path="/organizer/stats/tickets" element={<OrganizerTickets />} />
+              <Route path="/organizer/stats/engagement" element={<OrganizerEngagement />} />
+              <Route path="/organizer/event/:id" element={<OrganizerEventDetail />} />
+              <Route path="/organizer/create" element={<OrganizerCreateEvent />} />
+              <Route path="/organizer/create-success" element={<EventCreationSuccess />} />
+              <Route path="/organizer/support" element={<OrganizerSupport />} />
+              <Route path="/friends" element={<Friends />} />
+              <Route path="/organizer/profile" element={<OrganizerProfile user={user} setUser={setUser} setIsLoggedIn={setIsLoggedIn} setIsOrganizer={setIsOrganizer} />} />
+            </Routes>
+          </main>
+        </div>
+      </Router>
+    </ThemeProvider>
   );
 }
 

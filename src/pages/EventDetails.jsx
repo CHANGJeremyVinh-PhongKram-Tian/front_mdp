@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { MapPin, Calendar, Music, Heart, ChevronLeft, Forward, ChevronDown, Ticket, Moon, Sun } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
@@ -28,7 +29,7 @@ const EventDetails = () => {
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isDarkMode, toggleDarkMode } = useTheme();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -133,7 +134,7 @@ const EventDetails = () => {
         <div className="flex gap-2 pointer-events-auto">
            {/* THEME TOGGLE BUTTON */}
            <button 
-            onClick={() => setIsDarkMode(!isDarkMode)}
+            onClick={toggleDarkMode}
             className={`w-11 h-11 rounded-full flex items-center justify-center shadow-sm active:scale-95 transition-colors border ${isDarkMode ? 'bg-[#222222] border-[#333333] text-yellow-400' : 'bg-white border-gray-100 text-gray-700'}`}
           >
             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}

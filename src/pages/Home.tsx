@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Search as SearchIcon, Heart, Send, MapPin, Music, Tent, Trophy, MoreHorizontal, Home as HomeIcon, Ticket, User, Disc, Moon, Sun } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTheme } from '../contexts/ThemeContext';
 import starLogo from '../assets/star.png';
 
 const Home = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isDarkMode, toggleDarkMode } = useTheme();
 
   useEffect(() => {
     // Hide standard navbar/footer for full immersion
@@ -65,7 +66,7 @@ const Home = () => {
         <div className="flex gap-2">
           {/* THEME TOGGLE BUTTON */}
           <button 
-            onClick={() => setIsDarkMode(!isDarkMode)}
+            onClick={toggleDarkMode}
             className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm border transition-colors ${isDarkMode ? 'bg-[#222222] border-[#333333] text-yellow-400' : 'bg-white border-gray-100 text-gray-700'}`}
           >
             {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
