@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { MapPin, Calendar, Music, Heart, ChevronLeft, Forward, ChevronDown, Ticket } from 'lucide-react';
+import { MapPin, Calendar, Music, Heart, ChevronLeft, Forward, ChevronDown, Ticket, Moon, Sun } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
@@ -20,7 +20,7 @@ const FAKE_EVENT = {
   theme: 'Électro - House - Techno',
   tags: 'DJ Set - Live - Good vibes',
   description: 'Summer Vibes is back ! ☀️ Une soirée électro au cœur de Lyon avec les meilleurs DJs, des lights de folie et une ambiance unique.',
-  image: 'https://images.unsplash.com/photo-1540039155732-68473668c2d1?q=80&w=800'
+  image: 'https://picsum.photos/seed/demo/800/600'
 };
 
 const EventDetails = () => {
@@ -28,9 +28,16 @@ const EventDetails = () => {
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    // Masquer Navbar et Footer pour garder l'aspect mobile first / full screen
+    const nav = document.querySelector('nav');
+    const footer = document.querySelector('footer');
+    if (nav) nav.style.display = 'none';
+    if (footer) footer.style.display = 'none';
+
     fetch(`${API_URL}/evenements/${id}`)
       .then((res) => {
         if (!res.ok) throw new Error('API Error');
@@ -38,11 +45,11 @@ const EventDetails = () => {
       })
       .then((data) => {
         if (data && (data.title || data.titre)) {
-          // Normalize data
+          // Normalize data and handle image URL securely (Render vs Localhost)
           const normalizedEvent = {
             ...data,
             title: data.titre || data.title,
-            image: data.photo || data.image,
+            image: data.photo ? (data.photo.startsWith('http') ? data.photo : `${(import.meta.env.VITE_API_URL || 'http://localhost:8000/api').replace('/api', '')}/storage/${data.photo}`) : data.image,
             city: data.lieu || data.city,
             date: data.date_debut || data.date,
             price: data.prix || data.price,
@@ -59,17 +66,22 @@ const EventDetails = () => {
         setEvent(FAKE_EVENT);
         setLoading(false);
       });
+
+    return () => {
+      if (nav) nav.style.display = '';
+      if (footer) footer.style.display = '';
+    }
   }, [id]);
 
   const formatPrice = (price) => {
-    if (!price && price !== 0) return '25,00 €'; // Fallback
+    if (!price && price !== 0) return 'Gratuit';
     return `${Number(price).toFixed(2).replace('.', ',')} €`;
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#8b44f7] border-t-transparent rounded-full animate-spin"></div>
+      <div className={`min-h-screen flex items-center justify-center ${isDarkMode ? 'bg-[#111111]' : 'bg-[#FAFAFA]'}`}>
+        <div className="w-10 h-10 border-4 border-[#8B5CF6] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -96,34 +108,44 @@ const EventDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] font-sans antialiased relative pb-32">
-      {/* Background Halos */}
-      <div className="absolute top-0 right-0 w-80 h-80 bg-[#DBCDF8]/50 rounded-full blur-[80px] -z-10 -translate-y-20 translate-x-10 pointer-events-none"></div>
-      <div className="absolute top-40 left-0 w-64 h-64 bg-[#FFF9C4]/60 rounded-full blur-[80px] -z-10 -translate-x-20 pointer-events-none"></div>
+    <div className={`w-full max-w-[430px] mx-auto min-h-screen relative pb-32 font-sans overflow-x-hidden transition-colors duration-300 ${isDarkMode ? 'bg-[#111111]' : 'bg-[#FAFAFA]'}`}>
+      
+      {/* BACKGROUND GRADIENT */}
+      <div className={`absolute top-0 left-0 w-full h-72 -z-10 transition-opacity duration-500 ${isDarkMode ? 'bg-gradient-to-br from-[#FFE45E]/10 via-[#111111] to-[#8B5CF6]/20' : 'bg-gradient-to-br from-[#FFF5D1]/80 via-white to-[#EAE0FF]/80'}`}></div>
 
       {/* Floating Header */}
-      <div className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center p-5 pt-12 pointer-events-none">
-        <button onClick={() => navigate(-1)} className="w-11 h-11 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-[0_2px_15px_rgba(0,0,0,0.05)] pointer-events-auto active:scale-95 transition-transform">
-          <ChevronLeft size={24} strokeWidth={2.5} className="text-gray-900 pr-0.5" />
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-50 flex justify-between items-center p-5 pt-12 pointer-events-none">
+        <button onClick={() => navigate(-1)} className={`w-11 h-11 rounded-full flex items-center justify-center shadow-sm pointer-events-auto active:scale-95 transition-colors border ${isDarkMode ? 'bg-[#222222] border-[#333333] text-white' : 'bg-white border-gray-100 text-gray-900'}`}>
+          <ChevronLeft size={24} strokeWidth={2.5} className="pr-0.5" />
         </button>
-        <button className="w-11 h-11 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-[0_2px_15px_rgba(0,0,0,0.05)] pointer-events-auto active:scale-95 transition-transform">
-          <Forward size={22} strokeWidth={2.5} className="text-gray-900" />
-        </button>
+        <div className="flex gap-2 pointer-events-auto">
+           {/* THEME TOGGLE BUTTON */}
+           <button 
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            className={`w-11 h-11 rounded-full flex items-center justify-center shadow-sm active:scale-95 transition-colors border ${isDarkMode ? 'bg-[#222222] border-[#333333] text-yellow-400' : 'bg-white border-gray-100 text-gray-700'}`}
+          >
+            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+          <button className={`w-11 h-11 rounded-full flex items-center justify-center shadow-sm active:scale-95 transition-colors border ${isDarkMode ? 'bg-[#222222] border-[#333333] text-white' : 'bg-white border-gray-100 text-gray-900'}`}>
+            <Forward size={22} strokeWidth={2.5} />
+          </button>
+        </div>
       </div>
 
       <div className="px-5 pt-28">
         {/* Main Image */}
-        <div className="relative h-64 w-full rounded-[28px] overflow-hidden mb-6 shadow-[0_8px_30px_rgba(0,0,0,0.06)] bg-gray-100">
+        <div className={`relative h-64 w-full rounded-[28px] overflow-hidden mb-6 shadow-sm border ${isDarkMode ? 'bg-[#222222] border-[#333333]' : 'bg-white border-gray-100'}`}>
           <img 
-            src={event.image && event.image.startsWith('http') ? event.image : (event.image ? `http://localhost:8000/storage/${event.image}` : FAKE_EVENT.image)} 
+            src={event.image || `https://picsum.photos/seed/${event.id || 'demo'}/800/600`} 
+            onError={(e) => { e.currentTarget.src = `https://picsum.photos/seed/${event.id || 'demo'}100/800/600`; }}
             alt={event.title} 
             className="w-full h-full object-cover"
           />
-          <button className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/30 backdrop-blur-md">
+          <button className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-md">
             <Heart size={14} className="text-white" strokeWidth={2.5} />
           </button>
-          <div className="absolute bottom-3 left-3 bg-[#f5c000] rounded-xl px-3 py-2 flex flex-col items-center justify-center min-w-[50px] shadow-lg">
-            <span className="text-[18px] font-black leading-none">{day}</span>
+          <div className="absolute bottom-3 left-3 bg-[#FFE45E] rounded-xl px-3 py-2 flex flex-col items-center justify-center min-w-[50px] shadow-sm">
+            <span className="text-[18px] font-black leading-none text-gray-900">{day}</span>
             <span className="text-[10px] font-black uppercase leading-none mt-1 text-gray-900">{month}</span>
           </div>
         </div>
@@ -131,78 +153,78 @@ const EventDetails = () => {
         {/* Title & Price */}
         <div className="flex justify-between items-start mb-7 px-1">
           <div className="flex-1 pr-2">
-            <h1 className="text-[22px] font-black text-gray-900 uppercase leading-tight tracking-tight">{event.title}</h1>
-            <p className="text-[13px] font-medium text-gray-600 mt-1.5">
-              Par <span className="text-[#8b44f7] font-bold">{event.organisateur?.name || 'David Guetta'}</span>
+            <h1 className={`text-[22px] font-black uppercase leading-tight tracking-tight ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{event.title}</h1>
+            <p className={`text-[13px] font-medium mt-1.5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              Par <span className="text-[#8B5CF6] font-bold">{event.organisateur?.name || 'David Guetta'}</span>
             </p>
           </div>
-          <div className="text-[18px] font-black text-[#8b44f7] pt-0.5 shrink-0">
+          <div className="text-[18px] font-black text-[#8B5CF6] pt-0.5 shrink-0">
             {formatPrice(event.prix || event.price)}
           </div>
         </div>
 
         {/* Details Card */}
-        <div className="bg-white rounded-[26px] p-5 shadow-[0_2px_20px_rgba(0,0,0,0.03)] border border-gray-50 mb-8">
+        <div className={`rounded-[24px] p-5 shadow-sm border mb-8 transition-colors ${isDarkMode ? 'bg-[#222222] border-[#333333]' : 'bg-white border-gray-100'}`}>
           {/* Date */}
           <div className="flex items-start gap-4 mb-5">
-            <div className="mt-0.5 text-[#8b44f7]">
+            <div className="mt-0.5 text-[#8B5CF6]">
               <Calendar size={22} strokeWidth={2} />
             </div>
             <div>
-              <p className="text-[13px] font-black text-gray-900">{fullDate}</p>
-              <p className="text-[12px] font-medium text-gray-500 mt-0.5">{event.time || 'De 18:00 à 02:00'}</p>
+              <p className={`text-[13px] font-black ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{fullDate}</p>
+              <p className={`text-[12px] font-medium mt-0.5 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{event.time || 'De 18:00 à 02:00'}</p>
             </div>
           </div>
-          <div className="h-[1px] w-full bg-gray-50 ml-10 mb-5"></div>
+          <div className={`h-[1px] w-full ml-10 mb-5 ${isDarkMode ? 'bg-[#333333]' : 'bg-gray-50'}`}></div>
           
           {/* Location */}
           <div className="flex items-start gap-4 mb-5">
-            <div className="mt-0.5 text-[#8b44f7]">
+            <div className="mt-0.5 text-[#8B5CF6]">
               <MapPin size={22} strokeWidth={2} />
             </div>
             <div>
-              <p className="text-[13px] font-black text-gray-900">{event.address ? event.address.split(',')[0] : 'La Sucrière'}</p>
-              <p className="text-[12px] font-medium text-gray-500 mt-0.5 leading-snug">{event.address || '49-50 Quai Rambaud, 69002 Lyon, France'}</p>
+              <p className={`text-[13px] font-black ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{event.address ? event.address.split(',')[0] : 'La Sucrière'}</p>
+              <p className={`text-[12px] font-medium mt-0.5 leading-snug ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{event.address || '49-50 Quai Rambaud, 69002 Lyon, France'}</p>
             </div>
           </div>
-          <div className="h-[1px] w-full bg-gray-50 ml-10 mb-5"></div>
+          <div className={`h-[1px] w-full ml-10 mb-5 ${isDarkMode ? 'bg-[#333333]' : 'bg-gray-50'}`}></div>
 
           {/* Music Style */}
           <div className="flex items-start gap-4">
-            <div className="mt-0.5 text-[#8b44f7]">
+            <div className="mt-0.5 text-[#8B5CF6]">
               <Music size={22} strokeWidth={2} />
             </div>
             <div>
-              <p className="text-[13px] font-black text-gray-900">{event.theme || 'Électro - House - Techno'}</p>
-              <p className="text-[12px] font-medium text-gray-500 mt-0.5">{event.tags || 'DJ Set - Live - Good vibes'}</p>
+              <p className={`text-[13px] font-black ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{event.theme || 'Électro - House - Techno'}</p>
+              <p className={`text-[12px] font-medium mt-0.5 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{event.tags || 'DJ Set - Live - Good vibes'}</p>
             </div>
           </div>
         </div>
 
         {/* About */}
         <div className="mb-8 px-1">
-          <h2 className="text-[13px] font-black text-gray-900 uppercase tracking-wide mb-3">À propos</h2>
-          <p className="text-[13px] font-medium text-gray-700 leading-relaxed">
+          <h2 className={`text-[13px] font-black uppercase tracking-wide mb-3 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>À propos</h2>
+          <p className={`text-[13px] font-medium leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-700'}`}>
             {event.description || FAKE_EVENT.description}
           </p>
           <div className="flex justify-center mt-3">
-            <ChevronDown size={20} className="text-[#8b44f7]" />
+            <ChevronDown size={20} className="text-[#8B5CF6]" />
           </div>
         </div>
 
         {/* Organizer */}
         <div className="mb-9 px-1">
-          <h2 className="text-[13px] font-black text-gray-900 uppercase tracking-wide mb-4">Organisé par</h2>
+          <h2 className={`text-[13px] font-black uppercase tracking-wide mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Organisé par</h2>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img 
                 src={event.organisateur?.avatar || FAKE_EVENT.organisateur.avatar} 
                 alt="Organizer" 
-                className="w-12 h-12 rounded-full object-cover border-[3px] border-white shadow-sm"
+                className={`w-12 h-12 rounded-full object-cover border-[3px] shadow-sm ${isDarkMode ? 'border-[#111111]' : 'border-[#FAFAFA]'}`}
               />
-              <span className="text-[14px] font-black text-gray-900">{event.organisateur?.name || 'David Guetta'}</span>
+              <span className={`text-[14px] font-black ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{event.organisateur?.name || 'David Guetta'}</span>
             </div>
-            <button className="bg-[#DBCDF8]/40 text-[#8b44f7] text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-widest transition-colors hover:bg-[#DBCDF8]/60">
+            <button className={`text-[#8B5CF6] text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-widest transition-colors ${isDarkMode ? 'bg-[#2D1F3F] hover:bg-[#3D2F4F]' : 'bg-[#F3E8FF] hover:bg-[#EAE0FF]'}`}>
               Suivre
             </button>
           </div>
@@ -210,24 +232,24 @@ const EventDetails = () => {
 
         {/* Map */}
         <div className="mb-4 px-1">
-          <h2 className="text-[13px] font-black text-gray-900 uppercase tracking-wide mb-4 flex items-center gap-4">
-            Lieu <div className="h-[3px] w-24 bg-gray-900 rounded-full"></div>
+          <h2 className={`text-[13px] font-black uppercase tracking-wide mb-4 flex items-center gap-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            Lieu <div className={`h-[3px] w-24 rounded-full ${isDarkMode ? 'bg-white' : 'bg-gray-900'}`}></div>
           </h2>
-          <div className="w-full h-44 rounded-[24px] overflow-hidden shadow-sm border border-gray-100 bg-gray-200">
+          <div className={`w-full h-44 rounded-[24px] overflow-hidden shadow-sm border ${isDarkMode ? 'bg-[#222222] border-[#333333]' : 'bg-white border-gray-100'}`}>
             {/* Fake Map Image with Google Maps style */}
             <img 
               src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=600&blur=2" 
               alt="Map" 
-              className="w-full h-full object-cover opacity-90 scale-105"
+              className={`w-full h-full object-cover scale-105 ${isDarkMode ? 'opacity-70 invert hue-rotate-180' : 'opacity-90'}`}
             />
           </div>
         </div>
       </div>
 
       {/* Sticky Bottom Button */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-sm z-50">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[390px] z-50">
         <Link to={`/payment/${event.id || 'demo'}`} className="block w-full">
-          <button className="w-full bg-[#8b44f7] text-white rounded-[24px] py-[18px] px-6 flex items-center justify-between shadow-[0_8px_30px_rgba(139,68,247,0.3)] active:scale-95 transition-transform border border-purple-500/50">
+          <button className="w-full bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-[24px] py-[18px] px-6 flex items-center justify-between shadow-[0_10px_30px_rgba(139,92,246,0.3)] active:scale-95 transition-all">
             <div className="flex items-center gap-3">
               <Ticket size={22} strokeWidth={2.5} className="rotate-[-15deg] opacity-90" />
               <span className="text-[14px] font-black uppercase tracking-wide">Réserver votre billet</span>
