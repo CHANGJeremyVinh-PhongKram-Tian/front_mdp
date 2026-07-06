@@ -157,8 +157,8 @@ const Home = () => {
                   {/* Image & Date */}
                   <div className="relative h-32 w-full shrink-0">
                     <img 
-                      src={event.image || `https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=400&auto=format&fit=crop&sig=${event.id}`} 
-                      onError={(e) => { e.currentTarget.src = `https://source.unsplash.com/random/400x300/?concert,event,party&sig=${event.id}`; }}
+                      src={event.image || `https://picsum.photos/seed/${event.id}/400/300`} 
+                      onError={(e) => { e.currentTarget.src = `https://picsum.photos/seed/${event.id + 100}/400/300`; }}
                       alt={event.title} 
                       className="w-full h-full object-cover" 
                     />
@@ -216,8 +216,8 @@ const Home = () => {
             <Link to={`/event/${event.id}`} key={`rec-${event.id}`} className={`rounded-[20px] p-2 flex items-center shadow-sm border gap-3 transition-colors ${isDarkMode ? 'bg-[#222222] border-[#333333]' : 'bg-white border-gray-100'}`}>
               <div className="w-[80px] h-[80px] shrink-0 rounded-[16px] overflow-hidden">
                 <img 
-                  src={event.image || `https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=400&auto=format&fit=crop&sig=${event.id}`} 
-                  onError={(e) => { e.currentTarget.src = `https://source.unsplash.com/random/200x200/?festival,dj,club&sig=${event.id}`; }}
+                  src={event.image || `https://picsum.photos/seed/${event.id + 50}/200/200`} 
+                  onError={(e) => { e.currentTarget.src = `https://picsum.photos/seed/${event.id + 150}/200/200`; }}
                   alt={event.title} 
                   className="w-full h-full object-cover" 
                 />
