@@ -1,7 +1,10 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-const ThemeContext = createContext();
+const ThemeContext = createContext({
+  isDarkMode: false,
+  toggleDarkMode: () => {}
+});
 
 export const useTheme = () => useContext(ThemeContext);
 
