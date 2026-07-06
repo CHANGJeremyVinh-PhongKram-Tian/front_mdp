@@ -236,12 +236,16 @@ const EventDetails = () => {
             Lieu <div className={`h-[3px] w-24 rounded-full ${isDarkMode ? 'bg-white' : 'bg-gray-900'}`}></div>
           </h2>
           <div className={`w-full h-44 rounded-[24px] overflow-hidden shadow-sm border ${isDarkMode ? 'bg-[#222222] border-[#333333]' : 'bg-white border-gray-100'}`}>
-            {/* Fake Map Image with Google Maps style */}
-            <img 
-              src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=600&blur=2" 
-              alt="Map" 
-              className={`w-full h-full object-cover scale-105 ${isDarkMode ? 'opacity-70 invert hue-rotate-180' : 'opacity-90'}`}
-            />
+            <iframe 
+              width="100%" 
+              height="100%" 
+              style={{ border: 0 }} 
+              loading="lazy" 
+              allowFullScreen 
+              referrerPolicy="no-referrer-when-downgrade" 
+              src={`https://www.google.com/maps?q=${encodeURIComponent(event.address || event.city || 'Lyon, France')}&output=embed`}
+              className={`w-full h-full pointer-events-none sm:pointer-events-auto ${isDarkMode ? 'opacity-80 invert hue-rotate-180 contrast-90' : 'opacity-90'}`}
+            ></iframe>
           </div>
         </div>
       </div>
