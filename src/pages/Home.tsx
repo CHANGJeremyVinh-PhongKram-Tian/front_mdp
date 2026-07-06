@@ -29,7 +29,7 @@ const Home = () => {
           city: evt.lieu || evt.city,
           date: evt.date_debut || evt.date || "24 Mai 2026",
           price: evt.prix || evt.price,
-          image: evt.photo ? (evt.photo.startsWith('http') ? evt.photo : `http://localhost:8000/storage/${evt.photo}`) : evt.image,
+          image: evt.photo ? (evt.photo.startsWith('http') ? evt.photo : `${(import.meta.env.VITE_API_URL || 'http://localhost:8000/api').replace('/api', '')}/storage/${evt.photo}`) : evt.image,
           theme: evt.categorie || evt.theme
         }));
         
