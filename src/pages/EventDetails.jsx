@@ -50,8 +50,10 @@ const EventDetails = () => {
             ...data,
             title: data.titre || data.title,
             image: data.photo ? (data.photo.startsWith('http') ? data.photo : `${(import.meta.env.VITE_API_URL || 'http://localhost:8000/api').replace('/api', '')}/storage/${data.photo}`) : data.image,
-            city: data.lieu || data.city,
+            city: data.ville || data.lieu || data.city,
+            address: data.adresse || data.address || data.lieu,
             date: data.date_debut || data.date,
+            time: data.heure_debut || data.time || '20:00',
             price: data.prix || data.price,
             description: data.description || data.description,
           };
@@ -90,20 +92,30 @@ const EventDetails = () => {
   let day = "24";
   let month = "MAI";
   let fullDate = "sam 24 mai 2025";
+  
   if (event.date) {
-    const parts = event.date.split('-');
-    if (parts.length === 3) {
-      day = parts[2];
-      const m = parseInt(parts[1]);
-      const mois = ['JAN', 'FÉV', 'MAR', 'AVR', 'MAI', 'JUN', 'JUI', 'AOÛ', 'SEP', 'OCT', 'NOV', 'DÉC'];
-      month = mois[m-1] || 'MAI';
-      fullDate = `sam ${day} ${month.toLowerCase()} ${parts[0]}`;
-    } else if (event.date.includes(' ')) {
-      day = event.date.substring(8, 10);
-      const m = parseInt(event.date.substring(5, 7));
-      const mois = ['JAN', 'FÉV', 'MAR', 'AVR', 'MAI', 'JUN', 'JUI', 'AOÛ', 'SEP', 'OCT', 'NOV', 'DÉC'];
-      month = mois[m-1] || 'MAI';
-      fullDate = `sam ${day} ${month.toLowerCase()} 2025`;
+    try {
+      // Si c'est déjà un format texte du type "24 Juillet 2025"
+      if (/[a-zA-Z]/.test(event.date) && !event.date.includes('T')) {
+        const parts = event.date.split(' ');
+        if (parts.length >= 2) {
+          day = parts[0];
+          month = parts[1].substring(0, 3).toUpperCase();
+          fullDate = event.date;
+        }
+      } else {
+        // Format YYYY-MM-DD ou Date ISO
+        const d = new Date(event.date);
+        if (!isNaN(d.getTime())) {
+          day = d.getDate().toString().padStart(2, '0');
+          const mois = ['JAN', 'FÉV', 'MAR', 'AVR', 'MAI', 'JUN', 'JUI', 'AOÛ', 'SEP', 'OCT', 'NOV', 'DÉC'];
+          month = mois[d.getMonth()];
+          const jours = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
+          fullDate = `${jours[d.getDay()]} ${day} ${month.toLowerCase()} ${d.getFullYear()}`;
+        }
+      }
+    } catch (e) {
+      console.error(e);
     }
   }
 
@@ -183,8 +195,8 @@ const EventDetails = () => {
               <MapPin size={22} strokeWidth={2} />
             </div>
             <div>
-              <p className={`text-[13px] font-black ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{event.address ? event.address.split(',')[0] : 'La Sucrière'}</p>
-              <p className={`text-[12px] font-medium mt-0.5 leading-snug ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{event.address || '49-50 Quai Rambaud, 69002 Lyon, France'}</p>
+              <p className={`text-[13px] font-black ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{event.address ? event.address.split(',')[0] : (event.city || 'Lieu inconnu')}</p>
+              <p className={`text-[12px] font-medium mt-0.5 leading-snug ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{event.address || event.city || 'Adresse non renseignée'}</p>
             </div>
           </div>
           <div className={`h-[1px] w-full ml-10 mb-5 ${isDarkMode ? 'bg-[#333333]' : 'bg-gray-50'}`}></div>
